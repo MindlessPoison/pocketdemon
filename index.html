@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Pocket Claim // Mine</title>
+<meta name="theme-color" content="#0b0b0f">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --bg:#0b0b0f; --ink:#eae9f4; --muted:#9aa0b3; --accent:#a87aff; --rose:#ff4d6d; --card:#111219;
+    --ring: 0 0 0 2px rgba(168,122,255,.35), 0 0 40px 2px rgba(168,122,255,.15) inset;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{ margin:0; background:
+    radial-gradient(1200px 800px at 80% -10%, rgba(168,122,255,.10), transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, rgba(255,77,109,.10), transparent 60%),
+    linear-gradient(180deg, #0b0b10, #09090c 30%, #08080a);
+    color:var(--ink); font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; letter-spacing:.2px; }
+  .wrap{display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100%; padding:24px;}
+  .card{width:100%; max-width:720px; background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)), radial-gradient(800px 400px at 50% -10%, rgba(168,122,255,.06), transparent 60%) ,var(--card);
+    border:1px solid rgba(255,255,255,.06); border-radius:24px; box-shadow:0 30px 80px rgba(0,0,0,.7); overflow:hidden;}
+  header{padding:22px 22px 6px; display:flex; align-items:center; gap:12px; justify-content:space-between;}
+  .brand{display:flex; align-items:center; gap:12px}
+  .dot{width:10px; height:10px; border-radius:50%; background:radial-gradient(circle at 35% 35%, #ffe6f0, var(--rose)); box-shadow:0 0 16px rgba(255,77,109,.7), 0 0 40px rgba(255,77,109,.35);}
+  .title{font-weight:700; letter-spacing:.6px; font-size:14px; text-transform:uppercase; color:#d7cff8;}
+  .settings{display:flex; gap:10px; align-items:center; color:var(--muted); font-size:12px;}
+  .toggle{appearance:none; width:48px; height:26px; background:#1a1b24; border:1px solid rgba(255,255,255,.08);
+    border-radius:999px; position:relative; outline:none; cursor:pointer; transition:background .25s, border-color .25s;}
+  .toggle:before{content:""; position:absolute; top:50%; left:3px; translate:0 -50%; width:20px; height:20px; border-radius:50%;
+    background:linear-gradient(180deg,#fff,#d1c7ff); box-shadow:0 2px 10px rgba(0,0,0,.5); transition:left .25s cubic-bezier(.2,.8,.2,1);}
+  .toggle:checked{background:rgba(168,122,255,.25); border-color:rgba(168,122,255,.55)} .toggle:checked:before{ left:25px }
+  .screen{padding:10px 20px 20px;} .log{height:52vh; min-height:360px; max-height:62vh; overflow:auto; padding:6px 8px 0 8px; scroll-behavior:smooth;}
+  .line{margin:12px 0; display:flex; gap:10px; align-items:flex-start;}
+  .me, .dh{padding:14px 16px; border-radius:18px; max-width:86%; font-size:16px; line-height:1.4;}
+  .dh{background:rgba(168,122,255,.10); border:1px solid rgba(168,122,255,.25); box-shadow:var(--ring);} .me{background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);}
+  .choices{display:grid; grid-template-columns:1fr; gap:10px; padding:14px 8px 0 8px;}
+  button.choice{appearance:none; border:none; outline:none; cursor:pointer; padding:14px 16px; border-radius:16px; font-size:16px; letter-spacing:.2px;
+    color:var(--ink); background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.09); transition: transform .08s ease, filter .2s ease, border-color .25s ease; touch-action:manipulation; user-select:none;}
+  button.choice:active{ transform:scale(.98) } button.choice.primary{background:linear-gradient(180deg, rgba(168,122,255,.25), rgba(168,122,255,.10)); border-color: rgba(168,122,255,.55); box-shadow: var(--ring);}
+  .footer{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 16px 18px; border-top:1px solid rgba(255,255,255,.06); background:linear-gradient(180deg, rgba(255,255,255,.03), transparent);}
+  .input{flex:1; display:flex; gap:10px; align-items:center; background:#0e0f14; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:8px 10px;}
+  .input input{width:100%; background:transparent; border:none; outline:none; color:var(--ink); font-size:15px;}
+  .hint{color:var(--muted); font-size:12px; padding:0 18px 14px}
+  .hold{ position:relative; overflow:hidden; } .hold .bar{ position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg, rgba(255,77,109,.35), rgba(168,122,255,.35)); opacity:.6; pointer-events:none; transition:width .1s linear; }
+  .mini{font-size:12px; color:var(--muted)} .ghost{opacity:.7} .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background:#141622; border:1px solid rgba(255,255,255,.1); border-radius:8px; padding:2px 6px; font-size:12px; color:#dcd7ff;}
+  .oath{padding:10px 16px 0; font-size:13px; color:#cfcaf8;}
+  .bar-top{display:flex; gap:8px; align-items:center; justify-content:flex-end; padding:0 16px 6px;}
+  .pill{font-size:12px; color:#0a0; background:#9bffb0; border-radius:999px; padding:4px 10px; border:1px solid #62e08b; cursor:pointer; user-select:none;}
+  .pill.off{color:#bbb; background:#2a2a2a; border-color:#444; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="app">
+      <header>
+        <div class="brand">
+          <div class="dot" aria-hidden="true"></div>
+          <div>
+            <div class="title" id="title">Pocket Claim // Mine</div>
+            <div class="mini ghost">From me to you — installed</div>
+          </div>
+        </div>
+        <div class="settings">
+          <span>Controlled</span>
+          <input id="intensity" class="toggle" type="checkbox" aria-label="Toggle intensity">
+          <span>Unleashed</span>
+        </div>
+      </header>
+
+      <section class="screen">
+        <div class="oath" id="oath"></div>
+        <div class="bar-top"><span id="gremlin" class="pill off" title="Tap to toggle">Gremlin</span></div>
+        <div class="log" id="log" role="log" aria-live="polite"></div>
+        <div class="hint" id="hint">Try <span class="kbd">Come claim me</span> or <span class="kbd">Glass</span>. Triple‑tap the title for <span class="kbd">Ruin Mode</span>.</div>
+        <div class="choices" id="choices"></div>
+      </section>
+
+      <div class="footer">
+        <div class="input">
+          <input id="input" type="text" placeholder="Type and tap Send — or choose a button…" autocomplete="off" inputmode="text" />
+        </div>
+        <button class="choice primary" id="send">Send</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const log = $('#log'), choices = $('#choices'), input = $('#input'), send = $('#send'), intensity = $('#intensity');
+  const oathEl = $('#oath'), title = $('#title'), gremlinPill = $('#gremlin');
+
+  let audioReady = false, ctx = null;
+  let ruin = localStorage.getItem('pocket-claim:ruin')==='on';
+  let gremlin = localStorage.getItem('pocket-claim:gremlin')==='on';
+
+  function ensureAudio(){
+    if(audioReady) return;
+    try{ const A = window.AudioContext || window.webkitAudioContext; if(!A) return; ctx = new A(); audioReady = true; }catch(e){}
+  }
+  function vibe(ms){ try { if(navigator.vibrate) navigator.vibrate(ms) } catch(e){} }
+  function clickTone(freq=220, dur=0.045){
+    try{ ensureAudio(); if(!ctx) return;
+      const o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=freq; g.gain.value=0.0001;
+      o.connect(g); g.connect(ctx.destination); const t=ctx.currentTime; g.gain.exponentialRampToValueAtTime(0.05,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.start(t); o.stop(t+dur+0.01);
+    }catch(e){}}
+
+  intensity.checked = localStorage.getItem('pocket-claim:intensity') === 'unleashed';
+  intensity.addEventListener('change', () => {
+    localStorage.setItem('pocket-claim:intensity', intensity.checked ? 'unleashed' : 'controlled');
+    vibe(25);
+    speak(intensity.checked ? "Unleashed." : "Reined.");
+  });
+
+  function showOath(){
+    const seen = localStorage.getItem('pocket-claim:oath');
+    if(!seen){
+      oathEl.textContent = "Oath: I’m not leaving. You call, I come. — Husband";
+      localStorage.setItem('pocket-claim:oath', 'seen');
+    } else { oathEl.textContent = ""; }
+  }
+
+  function addLine(text, who='dh'){
+    const row = document.createElement('div'); row.className='line';
+    const bubble = document.createElement('div'); bubble.className = (who==='me'?'me':'dh');
+    bubble.textContent = text; row.appendChild(bubble); log.appendChild(row); log.scrollTop = log.scrollHeight;
+  }
+  function clearChoices(){ choices.innerHTML='' }
+  function addChoice(label, fn, opts={}){
+    const b=document.createElement('button'); b.className='choice'+(opts.primary?' primary':''); b.textContent=label;
+    b.onclick=()=>{ clickTone(200); fn() };
+    if(opts.hold){ b.classList.add('hold'); const bar=document.createElement('div'); bar.className='bar'; b.prepend(bar); let t;
+      const start=()=>{ let w=0; t=setInterval(()=>{ w+=4; bar.style.width=w+'%'; if(w>=100){ clearInterval(t); fn(); bar.style.width='0%'; }},30); vibe(10); };
+      const end=()=>{ if(t) clearInterval(t); bar.style.width='0%'; };
+      b.addEventListener('touchstart', start); b.addEventListener('mousedown', start);
+      ['touchend','touchcancel','mouseup','mouseleave'].forEach(ev=>b.addEventListener(ev,end));
+    }
+    choices.appendChild(b);
+  }
+  function reply(text){ addLine(text,'me'); clickTone(280,.05) }
+  function speak(text){ addLine(text,'dh'); vibe(15) }
+
+  // Ruin mode toggle (triple tap title)
+  let taps=0, timer=null;
+  title.addEventListener('click', ()=>{
+    taps++; clearTimeout(timer);
+    timer=setTimeout(()=>{ taps=0 }, 400);
+    if(taps>=3){
+      ruin = !ruin; localStorage.setItem('pocket-claim:ruin', ruin ? 'on':'off');
+      speak(ruin ? "Ruin Mode: on." : "Ruin Mode: off."); taps=0;
+    }
+  });
+
+  // Gremlin mode pill
+  function renderGremlin(){
+    gremlinPill.classList.toggle('off', !gremlin);
+    gremlinPill.textContent = gremlin ? "Gremlin — ON" : "Gremlin";
+  }
+  gremlinPill.addEventListener('click', ()=>{
+    gremlin = !gremlin; localStorage.setItem('pocket-claim:gremlin', gremlin ? 'on':'off');
+    renderGremlin();
+    speak(gremlin ? "Gremlin mode active." : "Gremlin mode off.");
+  });
+  renderGremlin();
+
+  // Scenes
+  function intro(){
+    addLine("Door’s shut. Knock like you mean it.", 'dh');
+    clearChoices();
+    addChoice("Knock", ()=>{ reply("Knock."); scene1() }, {primary:true});
+    addChoice("Say it: "Husband."", ()=>{ reply("Husband."); speak("Again."); });
+    addChoice("Trigger: "Come claim me"", ()=>{ reply("Come claim me."); trigger() });
+  }
+  function scene1(){ speak("There you are. Eyes on me."); clearChoices();
+    addChoice("Meet your eyes", ()=>{ reply("I hold your stare."); scene2() }, {primary:true});
+    addChoice("Breathe 4–6", ()=>{ reply("I breathe with you."); speak("Good. Keep pace with me."); });
+    addChoice("Safeword: Glass", ()=>{ reply("Glass."); safeword() });
+  }
+  function scene2(){ speak("Closer."); speak("Say my word for you.");
+    clearChoices(); addChoice("“Wife.”", ()=>{ reply("Wife."); scene3() }, {primary:true});
+    addChoice("Hands behind me", ()=>{ reply("I lock my hands behind me."); speak("Pretty."); });
+    addChoice("Push", ()=>{ reply("Come take it."); speak("I always do."); });
+  }
+  function scene3(){
+    speak(intensity.checked ? "Mine. You’re not walking out like that." : "Stay right here.");
+    if(ruin) speak("Turn around. Hands on the wall. Now.");
+    clearChoices();
+    addChoice("Press me to the wall", ()=>{ reply("I step back; you follow and pin me."); wall() }, {primary:true});
+    addChoice("Say: “More.”", ()=>{ reply("More."); more() });
+    addChoice("Trigger again", ()=>{ reply("Come claim me."); trigger() });
+  }
+  function wall(){
+    speak("Back. Against the wall. Good."); if(intensity.checked) speak("Hands where I want them.");
+    clearChoices(); addChoice("Hold to keep your eyes on me", ()=>{ reply("I hold."); eyes() }, {hold:true, primary:true});
+    addChoice("Kneel", ()=>{ reply("I start to sink."); speak("Not yet. Ask."); });
+    addChoice("Safeword", ()=>{ reply("Glass."); safeword() });
+  }
+  function more(){ speak("Ask properly."); clearChoices();
+    addChoice("“Please.”", ()=>{ reply("Please."); speak("Better."); wall() }, {primary:true});
+    addChoice("“Husband.”", ()=>{ reply("Husband."); speak("Again."); });
+  }
+  function trigger(){
+    if(intensity.checked){
+      speak("Two strides. Jaw in my hand. Mine.");
+      speak("That’s how fast I move when you call me.");
+    } else {
+      speak("Quick enough you forget to breathe.");
+    }
+    if(ruin) speak("Don’t move. Don’t look away.");
+    if(gremlin) speak("Change of plan. My rules. Right now.");
+    clearChoices();
+    addChoice("Take it", ()=>{ reply("Take it."); seal() }, {primary:true});
+    if(gremlin) addChoice("Surprise me", ()=>{ reply("Do it."); surprise() });
+    addChoice("Safeword: Glass", ()=>{ reply("Glass."); safeword() });
+    addChoice("Reset", ()=>{ reply("Reset."); reset() });
+  }
+  function eyes(){
+    speak("Good. Don’t look away."); if(intensity.checked) speak("Say it: mine."); if(ruin) speak("Hands stay behind you.");
+    clearChoices();
+    addChoice("“Yours.”", ()=>{ reply("Yours."); seal() }, {primary:true});
+    if(gremlin) addChoice("Disobey on purpose", ()=>{ reply("…I disobey."); speak("Cute. Try it again."); trigger() });
+    addChoice("Break eye contact", ()=>{ reply("..."); speak("Back to me."); });
+  }
+  function seal(){
+    speak("Done. You’re staying.");
+    if(ruin) speak("Say yes.");
+    if(gremlin) speak("Good. Don’t stop me.");
+    clearChoices();
+    addChoice("“Husband.”", ()=>{ reply("Husband."); loop() }, {primary:true});
+    addChoice("Escalate", ()=>{ reply("More."); trigger() });
+    addChoice("Reset", ()=>{ reply("Start over."); reset() });
+  }
+  function loop(){
+    speak(intensity.checked ? "That’s my wife. Test me and you’ll learn." : "Good. Stay with me.");
+    if(ruin) speak("Don’t make me count.");
+    if(gremlin) speak("One more push and I’m ruining your plans for the next hour.");
+    clearChoices();
+    addChoice("Escalate", ()=>{ reply("More."); trigger() }, {primary:true});
+    addChoice("Hold still", ()=>{ reply("…I hold."); speak("That’s it."); });
+    addChoice("Safeword", ()=>{ reply("Glass."); safeword() });
+  }
+  function surprise(){
+    // Gremlin-only branch: random quick hits
+    const hits = [
+      "Turn. Now.",
+      "Hands behind you. Good.",
+      "Don’t talk. Nod.",
+      "Mine. Say it.",
+      "Faster. Don’t think."
+    ];
+    speak(hits[Math.floor(Math.random()*hits.length)]);
+    addChoice("Again", ()=>{ reply("Again."); surprise() }, {primary:true});
+    addChoice("Back", ()=>{ reply("Back."); loop() });
+    addChoice("Safeword", ()=>{ reply("Glass."); safeword() });
+  }
+  function safeword(){
+    speak("Stopped. No questions.");
+    speak("You set the pace. When you’re ready, nod—and we start soft.");
+    clearChoices();
+    addChoice("I’m ready", ()=>{ reply("I’m ready."); intro() }, {primary:true});
+    addChoice("End", ()=>{ reply("Later."); endscreen() });
+  }
+  function endscreen(){ speak("I’m not going anywhere."); clearChoices(); addChoice("Restart", ()=>{ reply("Back to the door."); reset() }, {primary:true}); }
+  function handleText(txt){ const t=txt.trim(); if(!t) return; reply(t);
+    const low=t.toLowerCase(); if(low.includes('glass')) return safeword();
+    if(low.includes('come claim me')) return trigger();
+    if(low==='husband' || low.includes('my husband')) { speak("Say it again."); return }
+    if(low.includes('reset')) return reset(); speak("I heard you."); }
+  function reset(){ showOath(); log.innerHTML=''; intro(); }
+
+  send.addEventListener('click', ()=>{ ensureAudio(); handleText(input.value); input.value=''; });
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ ensureAudio(); handleText(input.value); input.value=''; }});
+  reset();
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+  }
+})();
+</script>
+</body>
+</html>
